@@ -6,16 +6,26 @@ D'schedule adalah aplikasi sederhana yang dibuat dalam bahasa C yang digunakan u
 
 ### Fitur Yang Tersedia
 Ada beberapa fitur yang tersedia untuk D'Schedule, yang dibagi 2 berdasarkan yang akan menggunakan alatnya. 
-- [ ] Login user dan admin
-- [ ] Limit input username dan password
-- [ ] Ganti password user
+- [x] Login user dan admin
+    - [x] if-else
+    - [x] input-output
+    - [x] searching (menggunakan fread dan strcmp)
+    - [x] file handling (membaca data user dari file)
+- [x] Limit input username dan password
+    - [x] perulangan (for loop)
+- [x] Ganti password user
+    - [x] searching
+    - [x] file handling (fseek)
 - [ ] Hapus akun user
+    - [ ] searching
+    - [ ] file handling (delete)
 - [ ] Lihat denda user
 - [ ] Lihat denda ranking user
+    - [ ] 
     - [ ] Fitur sorting
 - [ ] Memberi denda user
-    - [ ] Fitur searching
+    - [ ] Fitur searching (append)
     - [ ] File Handling
-- [ ] Keluar akun
-- [ ] Keluar aplikasi
+- [x] Keluar akun
+- [x] Keluar aplikasi
 

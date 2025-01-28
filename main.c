@@ -6,21 +6,27 @@ typedef struct user{
     char name[100];
     char username[100];
     char password[100];
+    int charge;
     int balance;
 }user;
 
 //UNIVERSAL FUNCTION
 void main_menu();
+void sort(user *users, int max);
+
 
 // ADMIN OR EVALUATOR
 void signin_admin();
 void menu_admin();
+void attendance_check();
+void give_charge();
+void see_users();
 
 //USER
 void signup_signin_user();
 void menu_user(char *username);
 void change_password(char *username);
-
+void check_balance(char *username);
 
 int main(){
     main_menu();
@@ -71,6 +77,7 @@ void signup_signin_user(){
         printf("Username  : "); gets(signup_user.username);
         printf("Password  : "); gets(signup_user.password);
         signup_user.balance = 0;
+        signup_user.charge = 0;
 
         if (fwrite(&signup_user, sizeof(signup_user), 1, data_file) != 0) {
             printf("Data saved successfully!\n");
@@ -158,28 +165,48 @@ void signin_admin(){
 //USER MENU AND FUNCTIONS
 void menu_user(char *username){
     printf("============== USER MENU =============\n");
-    printf("1. Check for balance\n2. Change Password\n4. Log Out\n5. Exit\nChoose : "); int choose; scanf("%d", &choose); getchar();
+    printf("1. Check for balance\n2. Change Password\n3. Log Out\n4. Exit\nChoose : "); int choose; scanf("%d", &choose); getchar();
 
     switch(choose){
         case 1:
-            printf("Dummy");
+            check_balance(username);
             break;
         case 2:
             change_password(username);
             break;
         case 3:
-            printf("Dummy");
-            break;
-        case 4:
             main_menu();
             break;
-        case 5:
+        case 4:
             exit(0);
             break;
         default:
             printf("Wrong choice! Try again!");
             menu_user(username);
     }
+}
+
+void check_balance(char *username, char *name){
+    user check;
+    
+    FILE *user_data;
+    user_data = fopen("data_user.dat", "rb");
+
+    printf("============== BALANCE CHECK =============\n");
+    printf("Hello, %s! Here's your balance/salary you get this month :\n", name);
+    
+    while(fread(&check, sizeof(check), 1, user_data) != 0){
+        if(strcmp(check.username, username)==0){
+            printf("Name     : %s\n", check.name);
+            printf("Balance  : Rp%d", check.balance);
+        }
+    }
+
+    fclose(user_data);
+    printf("\nPress any key to continue...");
+    getchar();
+
+    menu_user(username);
 }
 
 void change_password(char *username){
@@ -215,19 +242,21 @@ void change_password(char *username){
    menu_user(username);
 }
 
+
+//ADMIN MENU
 void menu_admin(){
     printf("============== ADMIN MENU =============\n");
-    printf("1. Give Charge\n2. Change User Password\n3. See User Lists\n4. Log Out\n5. Exit\nChoose : "); int choose; scanf("%d", &choose); getchar();
+    printf("1. Check Attendance\n2. Give Charge\n3. See User Lists\n4. Log Out\n5. Exit\nChoose : "); int choose; scanf("%d", &choose); getchar();
 
     switch(choose){
         case 1:
-            printf("Dummy");
+            attendance_check();
             break;
         case 2:
-            printf("Dummy");
+            give_charge();
             break;
         case 3:
-            printf("Dummy");
+            see_users();
             break;
         case 4:
             main_menu();
@@ -238,5 +267,94 @@ void menu_admin(){
         default:
             printf("Wrong choice! Try again!");
             menu_admin();
+    }
+}
+
+void attendance_check(){
+    printf("================= ATTENDANCE CHECK =================\n");
+    printf("This is the menu of attendance check, to make sure\n");
+    printf("the employees are coming to work on time. Please add the\n");
+    printf("time limit of attendance below, so the system can check\n");
+    printf("the time as soon as possible.\n");
+
+    printf("press any key to continue..."); getchar();
+    menu_admin();
+}
+
+void give_charge(){
+    FILE *user_data;
+    user_data = fopen("data_user.dat", "rb+");
+
+    printf("=================== GIVE CHARGE ==================\n");
+    printf("This is the menu of giving charge for employees that\n");
+    printf("late exceeding the limit time of being late. Make sure\n");
+    printf("that you've been inputting the right username\n");
+
+    fclose(user_data);
+    printf("press any key to continue..."); getchar();
+    menu_admin();
+}
+
+void see_users(){
+    FILE *user_data;
+
+    user store[300];
+    user read;
+    int save_state = 0;
+    user_data = fopen("data_user.dat", "rb");
+
+    printf("================== CHECK USER DATA ================\n");
+    printf("You can use this menu to check user data based on lowest\n");
+    printf("and highest data so far to evaluate each employees that needs\n");
+    printf("to get checked.\n\n");
+
+    while(fread(&read, sizeof(read), 1, user_data) != 0){
+        store[save_state] = read;
+        save_state++;
+    }
+
+    sort(store, save_state);
+    
+    int choose;
+    while(choose < 1 || choose > 2){
+        printf("choose assorted data from : 1. Lowest - highest\n2. Highest - Lowest\n Choose : "); scanf("%d", &choose); getchar();
+        switch (choose) {
+            case 1:
+                printf("\nDisplaying data (Lowest to Highest):\n");
+                for (int i = 0; i < save_state; i++) {
+                    printf("ID: %d, Name: %s, Balance: %.2f\n",
+                            i+1, store[i].name, store[i].balance);
+                }
+                break;
+
+            case 2:
+                printf("\nDisplaying data (Highest to Lowest):\n");
+                for (int i = save_state - 1; i >= 0; i--) {
+                    printf("ID: %d, Name: %s, Balance: %.2f\n",
+                            i+1, store[i].name, store[i].balance);
+                }
+                break;
+
+            default:
+                printf("Invalid choice. Please choose 1 or 2.\n");
+                break;
+        }
+    }
+
+    fclose(user_data);
+    printf("press any key to continue..."); getchar();
+    menu_admin();
+}
+
+void sort(struct user *users, int max) {
+    struct user temp;
+    for (int i = 0; i < max - 1; i++) {
+        for (int j = 0; j < max - i - 1; j++) {
+            if (users[j].balance > users[j + 1].balance){
+                temp = users[j];
+                users[j] = users[j + 1];
+                users[j + 1] = temp;
+            }
+        }
     }
 }
