@@ -64,16 +64,19 @@ void main_menu(){
 
 //================================================================================
 //USER MENU
-void signup_signin_user(){
+void signup_signin_user() {
     user data;
     user find;
+    FILE *data_file;
 
     printf("=========== MENU USER ============\n");
     printf("1. Sign Up\n2. Sign In\nChoose menu : ");
-    int choose; scanf("%d", &choose); getchar();
+    int choose;
+    scanf("%d", &choose);
+    getchar();
 
     if (choose == 1) {  // Sign Up
-        data_file = fopen("data_user.dat", "ab");  // Append mode for direct addition
+        data_file = fopen("data_user.dat", "ab");
         if (data_file == NULL) {
             printf("Error: Unable to open file for saving user data.\n");
             return;
@@ -121,7 +124,7 @@ void signup_signin_user(){
             printf("Password : "); gets(data.password);
 
             rewind(data_file);  // Reset file pointer to the start
-            while (fread(&find, sizeof(find), 1, data_file) != 0) {
+            while (fread(&find, sizeof(find), 1, data_file) == 1) {  
                 if (strcmp(data.username, find.username) == 0 && strcmp(data.password, find.password) == 0) {
                     found = 1;
                     break;
@@ -129,10 +132,11 @@ void signup_signin_user(){
             }
 
             if (found) {
+                fclose(data_file);  // Close only after checking all users
                 printf("Login successful! Press any key to continue...\n");
                 getchar();
-                menu_user(data.username, find.name);
-                break;
+                menu_user(find.username, find.name);
+                return;
             } else {
                 printf("Wrong username or password! Remaining attempts: %d\n", trial - 1);
             }
@@ -148,6 +152,7 @@ void signup_signin_user(){
     }
 }
 
+
 void menu_user(char *username, char *name){
     printf("============== USER MENU =============\n");
     printf("1. Check for balance\n2. Change Password\n3. See Charges\n4. Leaderboards\n5. Pay Charge\n6. Log Out\n7. Exit\nChoose : "); int choose; scanf("%d", &choose); getchar();
@@ -160,7 +165,7 @@ void menu_user(char *username, char *name){
             change_password(username, name);
             break;
         case 3:
-            see_charges(username, name);
+            seek_charges(username, name);
             break;
         case 4:
             see_users(username, name);
@@ -236,7 +241,7 @@ void change_password(char *username, char *name){
    menu_user(username, name);
 }
 
-void delete_charge(char *username, char *name) {
+void delete_charges(char *username, char *name) {
     FILE *user_data, *temp_data;
     user read;
     int found = 0;
@@ -292,6 +297,48 @@ void delete_charge(char *username, char *name) {
     menu_user(username, name);
 }
 
+void seek_charges(char *username, char *name) {
+    FILE *user_data;
+    user check;
+    int found = 0, choice;
+
+    printf("============= SEEK CHARGES =============\n");
+
+    user_data = fopen("data_user.dat", "rb");
+    if (user_data == NULL) {
+        printf("Error: User data file not found.\n");
+        return;
+    }
+
+    while (fread(&check, sizeof(check), 1, user_data)) {
+        if (strcmp(check.username, username) == 0) {
+            found = 1;
+            printf("Hello, %s!\n", name);
+            printf("Current Charge: Rp%d\n", check.charge);
+            printf("Current Balance: Rp%d\n", check.balance);
+            break;
+        }
+    }
+
+    fclose(user_data);
+
+    if (!found) {
+        printf("User not found.\n");
+    } else {
+        printf("Do you want to delete the charge?\n1. Yes\n2. No\nChoose: ");
+        scanf("%d", &choice);
+        getchar(); // Consume newline
+
+        if (choice == 1) {
+            delete_charges(username, name);
+        } else {
+            printf("Charge not deleted.\n");
+        }
+    }
+
+    printf("Press any key to continue...");
+    getchar();
+}
 
 
 //ADMIN MENU
